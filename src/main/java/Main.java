@@ -61,7 +61,7 @@ public class Main {
 
         //System.out.println(getCosineSimilarity(businesses[0], businesses[0]));
 
-        System.out.println(getBestSimilarity(businesses[0]));
+        System.out.println(getBestSimilarity(businesses[1]));
 
     }
 
@@ -112,22 +112,48 @@ public class Main {
         return getTF(businessX, word) * getIdf(word);
     }
 
-    //returns Cosine Similarity value closest to 1 with given businessX
+    //returns the two Cosine Similarity values closest to 1 with given businessX
     public static String getBestSimilarity(Business businessX){
-        double bestCosineSimilarityValue =0;
-        String closestBusiness="EmptyBusiness";
-        for(int i=0; i<businesses.length; i++){//for all businesses
+
+        int initialIndex= 0;//index to set up initial closestBusiness and secondClosestBusiness
+
+        double bestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//NOT necessarily the highest Cosine Similarity value
+        String closestBusiness= businesses[initialIndex].getBusinessID();
+        if (businessX.getBusinessID().equals(businesses[initialIndex].getBusinessID())){//if businessX and businesses[initialIndex] are the same business
+            initialIndex++;
+            bestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//set to next business
+            closestBusiness= businesses[initialIndex].getBusinessID();
+        }
+        initialIndex++;
+
+        double secondBestCosineSimilarityValue= getCosineSimilarity(businessX, businesses[initialIndex]);//NOT necessarily the second-highest Cosine Similarity value
+        String secondClosestBusiness= businesses[initialIndex].getBusinessID();
+        if (businessX.getBusinessID().equals(businesses[initialIndex].getBusinessID())){//if businessX and businesses[initialIndex] are the same business
+            initialIndex++;
+            secondBestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//set to next business
+            secondClosestBusiness= businesses[initialIndex].getBusinessID();
+        }
+        initialIndex++;
+
+        //DID NOT DO: switch bestCosineSimilarityValue and secondBestCosineSimilarityValue if bestCosineSimilarityValue is bigger
+
+        for(int i=initialIndex; i<businesses.length; i++){//for all businesses
             if(!businessX.getBusinessID().equals(businesses[i].getBusinessID())){//for all businesses not the given businessX
                 double cosSim= getCosineSimilarity(businessX, businesses[i]);//calculate similarity value b/t businesses
+                //System.out.print("(comparing: "+businessX.getBusinessID()+", "+businesses[i].getBusinessID()+")\t");
                 if(cosSim>bestCosineSimilarityValue){
+                    //System.out.print("(cosSim>bestCosineSimilarityValue)\t");
+                    secondBestCosineSimilarityValue= bestCosineSimilarityValue;//second-best value becomes previous-best value
+                    secondClosestBusiness= closestBusiness;//second-best business becomes previous-best business
                     bestCosineSimilarityValue= cosSim;//update best value
-                    closestBusiness= businesses[i].getBusinessID();
+                    closestBusiness= businesses[i].getBusinessID();//update best business
                 }
             }
 
         }
 
-        return "Business "+closestBusiness+" is best match at cosine similarity value= "+bestCosineSimilarityValue+"\n";
+        return closestBusiness+" is similar at cosine similarity value= "+bestCosineSimilarityValue+"\n"+
+                secondClosestBusiness+" is also similar at cosine similarity value= "+secondBestCosineSimilarityValue+"\n";
     }
 
     public static double getCosineSimilarity(Business businessA, Business businessB){
