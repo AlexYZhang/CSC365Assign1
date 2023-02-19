@@ -5,6 +5,7 @@ import java.util.ArrayList;
 //all reviews put into one single lump review
 public class Business {
     String businessID;
+    String businessName;
     String review; //all reviews put into this one
     public String[] individualWords;
     HT wordsHashTable= new HT();
@@ -79,6 +80,10 @@ public class Business {
 
     public String getBusinessID() {
         return businessID;
+    }
+
+    public String getBusinessName(){
+        return businessName;
     }
 
     //for TESTING only (remove later)

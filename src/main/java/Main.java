@@ -65,6 +65,17 @@ public class Main {
 
     }
 
+    //returns the Business given a business name; returns null if business name doesn't exist
+    public static Business getBusiness(String businessName){
+        for(int i=0; i<businesses.length; i++){//for each business
+            if(businesses[i].getBusinessName().equals(businessName)){//if business names match
+                return businesses[i];
+            }
+        }
+        return null;
+    }
+
+
     public static void setTfidfVectorForAllBusinesses(){
         for(int i=0; i<businesses.length; i++){
             setTfidVectorForABusiness(businesses[i]);
@@ -114,6 +125,9 @@ public class Main {
 
     //returns the two Cosine Similarity values closest to 1 with given businessX
     public static String getBestSimilarity(Business businessX){
+
+        if(businessX==null)
+            return null;
 
         int initialIndex= 0;//index to set up initial closestBusiness and secondClosestBusiness
 
