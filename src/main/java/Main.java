@@ -14,7 +14,6 @@ import yelp_dataset.Review;
 
 public class Main {
 
-    //static ArrayList<Business> businesses= new ArrayList<>();//should hold 10000 businesses
     static Hashtable<String, Business> businesses = new Hashtable<>();//key= businessID, value= Business object
     static Hashtable<String, String> businessesByName= new Hashtable<>(); //key= businessName, value= businessID; so GUI can get businessID from businessName
     static FT totalWordsFT = new FT(); //Hashtable of all words in all reviews of all businesses
@@ -32,7 +31,6 @@ public class Main {
         FileReader busReader = new FileReader("src/main/java/yelp_dataset/new_10000_Business.json");
 
         BufferedReader br = new BufferedReader(busReader);
-        //Business[] businesses = new Business[10000];
         //Hashtable<String, String> bHT = new Hashtable<>();//will hold the 10000 business's businessID?
         int x = 0;
         Business newBusiness= new Business();
@@ -63,7 +61,6 @@ public class Main {
 
 //------------------------ turning all reviews into java objects and storing in multiple arraylist of size 15,887----------------------
         FileReader revReader = new FileReader("src/main/java/yelp_dataset/new_reviews.json");
-        //FileReader revReader = new FileReader("src/main/java/yelp_dataset/new_reviews.json");
         BufferedReader rbr = new BufferedReader(revReader);
 
         Review newReview;
@@ -124,15 +121,6 @@ public class Main {
 
         //System.out.println(getBestSimilarity(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"))); //UNCOMMENT THIS
 
-    }
-
-    //returns the Business given a business name; returns null if business name doesn't exist
-    public static Business getBusiness(String businessName){
-
-        String businessID;
-        businessID= businessesByName.get(businessName);//gives corresponding businessID from given businessName
-
-        return businesses.get(businessID);
     }
 
 
@@ -201,7 +189,7 @@ public class Main {
     public static String getBestSimilarity(Business businessX){
 
         if(businessX==null)
-            return "Given business given is null";
+            return "Given business is null";
 
         //int initialIndex= 0;//index to set up initial closestBusiness and secondClosestBusiness
         //String initialBusinessID= "Pns2l4eNsfO8kk83dixA6A";
