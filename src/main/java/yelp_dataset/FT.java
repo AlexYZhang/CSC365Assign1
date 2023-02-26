@@ -8,22 +8,21 @@ use this code to create a frequency table that
 counts frequency of words in a text
 ie. adjust the add function and put in a count function*/
 
-import java.util.*;
-import java.io.*;
-public class HT implements java.io.Serializable {
+public class FT implements java.io.Serializable {
 
     //static keyword means the value is the same for every instance of the class
     //final keyword means once the variable is assigned a value it can never be changed (cannot be inherited)
     public static final class Node {
-        Object key;
+        String key;
         Node next;
         int count;
         // Object value;
-        Node(Object k, int c, Node n) { key = k; count= c; next = n; }
+        Node(String k, int c, Node n) { key = k; count= c; next = n; }
 
-        public Object getKey(){
+        public String getKey(){
             return key;
         }
+
         public Node getNext(){
             return next;
         }
@@ -38,7 +37,7 @@ public class HT implements java.io.Serializable {
     int size = 0; //number of keys currently present in hash table
 
     //locate correct index, then traverse Nodes at that index to look for given key
-    public boolean contains(Object key) {
+    public boolean contains(String key) {
         int h = key.hashCode(); // h= hash code
         //System.out.println("h= "+h);
         int i = h & (table.length - 1);// bitwise AND operation to get to correct index number i
@@ -50,7 +49,7 @@ public class HT implements java.io.Serializable {
         return false;
     }
 
-    public void add(Object key) {
+    public void add(String key) {
         //System.out.print("(key to add: "+ key+")\t");
         int h = key.hashCode();
         int i = h & (table.length - 1);
@@ -83,7 +82,7 @@ public class HT implements java.io.Serializable {
 
     //my own code for exercise 2
     //returns count of given key
-    public int getCount(Object key){
+    public int getCount(String key){
         //System.out.print("(INSIDE getCount: key to add: "+ key+")\t");
         int h = key.hashCode(); // h= hash code
         int i = h & (table.length - 1);// bitwise AND operation to get to correct index number i
@@ -122,7 +121,7 @@ public class HT implements java.io.Serializable {
         table = newTable;
     }
 
-    public void remove(Object key) {
+    public void remove(String key) {
         int h = key.hashCode();
         int i = h & (table.length - 1);
         Node e = table[i], p = null;
@@ -162,7 +161,7 @@ public class HT implements java.io.Serializable {
     }
 
 
-    private void writeObject(ObjectOutputStream s) throws Exception {
+  /*  private void writeObject(ObjectOutputStream s) throws Exception {
         s.defaultWriteObject();
         s.writeInt(size);
         for (int i = 0; i < table.length; ++i) {
@@ -180,7 +179,7 @@ public class HT implements java.io.Serializable {
         int n = s.readInt(); // readInt() reads a 32-bit int
         for (int i = 0; i < n; ++i)
             add(s.readObject());
-    }
+    }*/
 }
 
 

@@ -1,96 +1,162 @@
 import yelp_dataset.Business;
-import yelp_dataset.HT;
+import yelp_dataset.FT;
 import yelp_dataset.JObject;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.SplittableRandom;
+
+import com.google.gson.Gson;
+import yelp_dataset.Review;
 
 public class Main {
 
-    static JObject[] jsonObjects= new JObject[3]; //holds JSON objects
-    static Business[] businesses= new Business[3];//should hold 10000 businesses (change from the 3)
-    static HT totalWordsHT= new HT(); //Hashtable of all words in all reviews of all businesses
+    //static ArrayList<Business> businesses= new ArrayList<>();//should hold 10000 businesses
+    static Hashtable<String, Business> businesses = new Hashtable<>();//key= businessID, value= Business object
+    static Hashtable<String, String> businessesByName= new Hashtable<>(); //key= businessName, value= businessID; so GUI can get businessID from businessName
+    static FT totalWordsFT = new FT(); //Hashtable of all words in all reviews of all businesses
 
-    public static void main(String args[]){
-
-        //assuming will have an Object with strings from Yelp JSON file
-        //use 3 businesses to test idea
-        //NOTE: all words are treated as lowercase!!!!
-        jsonObjects[0]= new JObject("businessA", "This is a great restaurant, I said.");
-        /*jsonObjects[1]= new JObject("businessB", "Great place to hang out after work: " +
-                "the prices are decent, and the ambience is fun. It's a bit loud, but very lively. " +
-                "The staff is friendly, and the food is good. They have a good selection of drinks.");*/
-        jsonObjects[1]= new JObject("businessB", "This is a great restaurant, I said.");
-        jsonObjects[2]= new JObject("businessC", "If you decide to eat here, " +
-                "just be aware it is going to take about 2 hours from beginning to end. " +
-                "We have tried it multiple times, because I want to like it! I have been to " +
-                "it's other locations in NJ and never had a bad experience. \n\nThe food is good, " +
-                "but it takes a very long time to come out. The waitstaff is very young, but usually pleasant. " +
-                "We have just had too many experiences where we spent way too long waiting. " +
-                "We usually opt for another diner or restaurant on the weekends, in order to be done quicker.");
-        //JObject d= new JObject("businessA", "This is the second review.");
+    //Vicky's code
+    //private static Object StringUtils;
+    //private Business IOUtils;
 
 
-        /*//adds JSON Objects to jsonObjects array (real data should parse into jsonObjects array)
-        jsonObjects[0]= a;
-        jsonObjects[1]= b;
-        jsonObjects[2]= c;*/
+    public static void main(String[] args) throws IOException {
+        ///////////////////////////////////Start of Vicky's code
+        Gson gson = new Gson();
+
+        //------------------------- turning 10,000 businesses into java objects and storing in arraylist----------------------
+        FileReader busReader = new FileReader("src/main/java/yelp_dataset/new_10000_Business.json");
+
+        BufferedReader br = new BufferedReader(busReader);
+        //Business[] businesses = new Business[10000];
+        //Hashtable<String, String> bHT = new Hashtable<>();//will hold the 10000 business's businessID?
+        int x = 0;
+        Business newBusiness= new Business();
+        while(br.ready() && x <= 100001 ){
+            newBusiness= gson.fromJson(br.readLine(), Business.class);//convert JSON object to Business class
+            businesses.put(newBusiness.getBusinessID(), newBusiness);//put newBusiness into businesses hashmap
+            businessesByName.put(newBusiness.getBusinessName(), newBusiness.getBusinessID());//put newBusiness in: key= businessName, value= businessID
+            x++;
+//            for(Business b: businesses){
+//                bHT.put(b.getBus_id(), b.getBus_name());
+//            }
+
+        }
+
+       /* System.out.println("This is a business with id mpf3x-BjTdTEA3yCZrAYPw: "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw"));
+        System.out.println("This is a business that doesn't exist: "+businesses.get("sheep"));
+        System.out.println("This is businessID for one of The UPS Store: "+businessesByName.get("The UPS Store"));//note: there are multiple stores w/ same name
+        System.out.println("size= "+businesses.size());*/
+        //Business b1= businesses.get(1);//"business_id":"mpf3x-BjTdTEA3yCZrAYPw","name":"The UPS Store",
 
 
-        //create each Business, set data for the Business, and put into businesses array
-        for(int i=0; i<3; i++){//put each JObject data into a Business
-            businesses[i]= new Business(jsonObjects[i].getBusinessID());//set businessID
-            businesses[i].setReview(jsonObjects[i].getReview());//set review (use data from Object a)
-            businesses[i].runHT();//puts review into a hashTable
-            //System.out.println("business "+i+" review: "+businesses[i].getReview());
-            //System.out.println();
-            for(int j=0; j<businesses[i].getIndividualWords().length; j++){//for each word in review
-                totalWordsHT.add(businesses[i].getIndividualWords()[j]);//adds individual word to totalWordsHT
+
+        br.close();
+        busReader.close();
+
+        //should have businesses arrayList with 10000 business (with businessIDs and businessNames) by this point(but not Review per business)
+        //have now dealt with the Business yelp dataset
+
+//------------------------ turning all reviews into java objects and storing in multiple arraylist of size 15,887----------------------
+        FileReader revReader = new FileReader("src/main/java/yelp_dataset/new_reviews.json");
+        //FileReader revReader = new FileReader("src/main/java/yelp_dataset/new_reviews.json");
+        BufferedReader rbr = new BufferedReader(revReader);
+
+        Review newReview;
+        int i = 0;
+        while(rbr.ready()){
+            newReview= gson.fromJson(rbr.readLine(), Review.class);//get a new Review object from JSON
+            //System.out.println("new Review= "+newReview.equals(null));
+            if(businesses.get(newReview.getBus_id()) !=null){//if newReview has a businessID that is in businesses
+                businesses.get(newReview.getBus_id()).addToReview(newReview.getText());//add newReview's text to appropriate Business in businesses
             }
         }
 
-        //System.out.println("this is the getTf call: "+ getTF(businesses[1], "the"));
-        //System.out.println("Businesses containing the word= "+businessesContainingWord("the"));
+        for(Business b: businesses.values()){//for each Business in businesses
+            b.runFT();//puts review into a hashTable
+            for(int j=0; j<b.getIndividualWords().length; j++){//for each word in review
+                totalWordsFT.add(b.getIndividualWords()[j]);//adds individual word to totalWordsHT
+            }
+        }
+
+
+
+        //businesses.get("mpf3x-BjTdTEA3yCZrAYPw").runFT();
+        //System.out.println("review of business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getBusinessName());
+        System.out.println("review of business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getReview()); //THIS WORKS!
+        //System.out.println("indiv words= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getIndividualWords());
+        //System.out.println("count of the in business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getCount("the"));
+        //System.out.println("count of the in all businesses= "+totalWordsFT.getCount("the"));
+
+
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        //System.out.println("this is the getTf call: "+ getTF(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"), "the"));
         //System.out.println("this is the getIdf call: "+getIdf("the"));
 
-        //setTfidVectorForABusiness(businesses[1]);
-        //System.out.println("business 1's tfidfVector length= "+businesses[1].getTfidfVector().length);
+        //System.out.println("businesses containing the= "+businessesContainingWord("i"));
+        setTfidVectorForABusiness(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"));
+        //System.out.println("business 1's tfidfVector length= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getTfidfVector().length);
         //System.out.println("totalWordsHT's size= "+ totalWordsHT.getSize());
         //System.out.println("totalWordsHT table's index 0 key= "+totalWordsHT.getTable()[1].getKey());
         //System.out.println("businessX's tfidf[0] value= "+businesses[1].getTfidfVector()[0]);
 
-        setTfidfVectorForAllBusinesses();
+
+        //setTfidfVectorForAllBusinesses();//UNCOMMENT THIS
+
+
         //System.out.println("businessX's tfidf[0] value= "+businesses[2].getTfidfVector()[1]);
 
-        //System.out.println(getCosineSimilarity(businesses[0], businesses[0]));
+        //System.out.println("diff BUSINESS COMPARED: "+getCosineSimilarity(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"), businesses.get("FPF2G2svSMZ_twSPsoU_ZQ")));
 
-        System.out.println(getBestSimilarity(businesses[1]));
+
+
+
+
+        //System.out.println(getBestSimilarity(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"))); //UNCOMMENT THIS
 
     }
 
     //returns the Business given a business name; returns null if business name doesn't exist
     public static Business getBusiness(String businessName){
-        for(int i=0; i<businesses.length; i++){//for each business
-            if(businesses[i].getBusinessName().equals(businessName)){//if business names match
-                return businesses[i];
-            }
-        }
-        return null;
+
+        String businessID;
+        businessID= businessesByName.get(businessName);//gives corresponding businessID from given businessName
+
+        return businesses.get(businessID);
     }
 
 
     public static void setTfidfVectorForAllBusinesses(){
-        for(int i=0; i<businesses.length; i++){
-            setTfidVectorForABusiness(businesses[i]);
+        /*for(int i=0; i<businesses.size(); i++){
+            setTfidVectorForABusiness(businesses.get(i));
+        }*/
+
+        for(Business b: businesses.values()){//for every Business in businesses
+            setTfidVectorForABusiness(b);
         }
+
     }
 
     public static void setTfidVectorForABusiness(Business businessX){
-        businessX.setTfidfVectorSize(totalWordsHT.getSize());//make businessX's tfid vector the size of the number of unique words in all reviews of all businesses
+        businessX.setTfidfVectorSize(totalWordsFT.getSize());//make businessX's tfid vector the size of the number of unique words in all reviews of all businesses
         int indexCounter= 0;//index of businessX's tfidfVector
-        for(int i=0; i<totalWordsHT.getTableLength(); i++){//for each index in totalWordsHT hashTable
-            for(HT.Node e = totalWordsHT.table[i]; e!=null; e=e.getNext()) {//for every Node (ie. unique word) in totalWordsHT
+        for(int i = 0; i< totalWordsFT.getTableLength(); i++){//for each index in totalWordsHT hashTable
+            for(FT.Node e = totalWordsFT.table[i]; e!=null; e=e.getNext()) {//for every Node (ie. unique word) in totalWordsHT
                 businessX.setTfidfVector(getTfidf(businessX, (String) e.getKey()), indexCounter);//sets tfidf of word (at indexCounter position) for businessX
                 indexCounter++;
             }
         }
+        System.out.println("finished setTfidVectorForABusiness for: "+businessX.getBusinessID());
     }
 
     //calculate tf for word
@@ -104,18 +170,26 @@ public class Main {
     public static int businessesContainingWord(String word){
         //search thru all businesses to find number of businesses with the given word
         int counter= 0; //counts number of businesses with given word
-        for (int i=0; i<3; i++){//search each business
-            if(businesses[i].getCount(word) !=0) {
+
+        /*for (int i=0; i<3; i++){//search each business
+            if(businesses.get(i).getCount(word) !=0) {
+                counter++;
+            }
+        }*/
+
+        for(String businessID: businesses.keySet()){//for every Business in businesses
+            if(businesses.get(businessID).getCount(word) !=0){
                 counter++;
             }
         }
+
         return counter;
     }
 
     //calculate idf for given word
     public static double getIdf(String word){
         //NOTE; Math.log here is actually the natural log (ie. ln)
-        return Math.log(3.0 / (double)businessesContainingWord(word)); //idf formula assuming 10000 businesses
+        return Math.log(10000 / (double)businessesContainingWord(word)); //idf formula assuming 10000 businesses
     }
 
     //returns TF-IDF calculation
@@ -127,51 +201,45 @@ public class Main {
     public static String getBestSimilarity(Business businessX){
 
         if(businessX==null)
-            return null;
+            return "Given business given is null";
 
-        int initialIndex= 0;//index to set up initial closestBusiness and secondClosestBusiness
+        //int initialIndex= 0;//index to set up initial closestBusiness and secondClosestBusiness
+        //String initialBusinessID= "Pns2l4eNsfO8kk83dixA6A";
+        //String secondBusinessID= "mpf3x-BjTdTEA3yCZrAYPw";
 
-        double bestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//NOT necessarily the highest Cosine Similarity value
-        String closestBusiness= businesses[initialIndex].getBusinessID();
-        if (businessX.getBusinessID().equals(businesses[initialIndex].getBusinessID())){//if businessX and businesses[initialIndex] are the same business
-            initialIndex++;
-            bestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//set to next business
-            closestBusiness= businesses[initialIndex].getBusinessID();
-        }
-        initialIndex++;
-
-        double secondBestCosineSimilarityValue= getCosineSimilarity(businessX, businesses[initialIndex]);//NOT necessarily the second-highest Cosine Similarity value
-        String secondClosestBusiness= businesses[initialIndex].getBusinessID();
-        if (businessX.getBusinessID().equals(businesses[initialIndex].getBusinessID())){//if businessX and businesses[initialIndex] are the same business
-            initialIndex++;
-            secondBestCosineSimilarityValue = getCosineSimilarity(businessX, businesses[initialIndex]);//set to next business
-            secondClosestBusiness= businesses[initialIndex].getBusinessID();
-        }
-        initialIndex++;
+        double bestCosineSimilarityValue= 0.0;
+        double secondBestCosineSimilarityValue= 0.0;
+        Business closestBusiness= null;
+        Business secondClosestBusiness= null;
 
         //DID NOT DO: switch bestCosineSimilarityValue and secondBestCosineSimilarityValue if bestCosineSimilarityValue is bigger
 
-        for(int i=initialIndex; i<businesses.length; i++){//for all businesses
-            if(!businessX.getBusinessID().equals(businesses[i].getBusinessID())){//for all businesses not the given businessX
-                double cosSim= getCosineSimilarity(businessX, businesses[i]);//calculate similarity value b/t businesses
-                //System.out.print("(comparing: "+businessX.getBusinessID()+", "+businesses[i].getBusinessID()+")\t");
-                if(cosSim>bestCosineSimilarityValue){
-                    //System.out.print("(cosSim>bestCosineSimilarityValue)\t");
+        for(Business b: businesses.values()) {//for each Business b in businesses
+            if (!businessX.equals(b)) {//if b is not the same business as businessX
+                double cosSim = getCosineSimilarity(businessX, b);//calculate similarity value b/t businesses
+                System.out.println("(comparing: "+businessX.getBusinessID()+", "+b.getBusinessID()+")\t");
+                System.out.println("(bestCosSim= "+bestCosineSimilarityValue+" from "+closestBusiness.getBusinessID()+ " secondBestCosSim= "+secondBestCosineSimilarityValue+" from "+secondClosestBusiness.getBusinessID());
+                if (cosSim > bestCosineSimilarityValue) {
+                    System.out.print("(cosSim>bestCosineSimilarityValue)\t");
                     secondBestCosineSimilarityValue= bestCosineSimilarityValue;//second-best value becomes previous-best value
                     secondClosestBusiness= closestBusiness;//second-best business becomes previous-best business
                     bestCosineSimilarityValue= cosSim;//update best value
-                    closestBusiness= businesses[i].getBusinessID();//update best business
+                    closestBusiness= b;//update best business
+                    System.out.println("(bestCosSim= "+bestCosineSimilarityValue+" from "+closestBusiness.getBusinessID()+ " secondBestCosSim= "+secondBestCosineSimilarityValue+" from "+secondClosestBusiness.getBusinessID());
                 }
             }
-
         }
 
-        return closestBusiness+" is similar at cosine similarity value= "+bestCosineSimilarityValue+"\n"+
-                secondClosestBusiness+" is also similar at cosine similarity value= "+secondBestCosineSimilarityValue+"\n";
+        return closestBusiness.getBusinessName()+" is similar at cosine similarity value= "+bestCosineSimilarityValue+"\n"+
+                secondClosestBusiness.getBusinessName()+" is also similar at cosine similarity value= "+secondBestCosineSimilarityValue+"\n";
     }
 
     public static double getCosineSimilarity(Business businessA, Business businessB){
-        return calculateCosineSimilarity(businessA.getTfidfVector(), businessB.getTfidfVector());
+        if(businessA.equals(businessB)){
+            return 1.0;
+        }else {
+            return calculateCosineSimilarity(businessA.getTfidfVector(), businessB.getTfidfVector());
+        }
     }
 
     //returns cosine similarity between tfidf vectors of businessA (ie. tfidfVectorA) and businessB (ie. tfidfCectorB)

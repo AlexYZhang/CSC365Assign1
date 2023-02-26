@@ -1,44 +1,59 @@
 package yelp_dataset;
 
-import java.util.ArrayList;
+import com.google.gson.annotations.SerializedName;
 
 //all reviews put into one single lump review
 public class Business {
-    String businessID;
+
+    @SerializedName("business_id")
+    String businessID= null;
+
+    @SerializedName("name")
     String businessName;
     String review; //all reviews put into this one
     public String[] individualWords;
-    HT wordsHashTable= new HT();
+    FT wordsHashTable= new FT();
     double[] tfidfVector;//holds tfidf value of each word
+
+    public Business(){
+    }
 
     public Business(String businessID){
         this.businessID= businessID;
     }
 
 
-    //create HT by putting given review into a HT
+    //create FT by putting given review into a FT
     //change this later
-    public void runHT() {
+    public void runFT() {
         individualWords= review.split(" ");
 
-        //removes periods,commas
-        //put into hashtable
-        for(int i=0; i<individualWords.length; i++){
-            individualWords[i]= individualWords[i].replaceAll("[.,: ]", "");
-            individualWords[i]= individualWords[i].toLowerCase();//converts word to lowercase
-            wordsHashTable.add(individualWords[i]);//add to hashTable
-        }
-
-       /* //to test tokenization
+        /*//to test tokenization
         System.out.println("This is the tokenized review:");
         for (String word: individualWords){
             System.out.println(word);
         }*/
 
-        //for(Object word: wordsHashTable)
+
+
+        //removes periods,commas
+        //put into hashtable
+        for(int i=0; i<individualWords.length; i++){
+            //individualWords[i]= individualWords[i].replaceAll("[\n.,: ]", "");
+            //individualWords[i]= individualWords[i].toLowerCase();//converts word to lowercase
+            wordsHashTable.add(individualWords[i]);//add to hashTable
+        }
+
+
+
+
 
     }
 
+    //add to review (ie. concatenate more reviews found for this business)
+    public void addToReview(String additionalReview){
+        this.review= review +" "+additionalReview;
+    }
 
 
     //returns quantity of given word in review
@@ -59,6 +74,10 @@ public class Business {
 
     public double[] getTfidfVector() {
         return tfidfVector;
+    }
+
+    public void setBusinessName(String businessID){
+        this.businessID= businessID;
     }
 
     public void setReview(String review){
@@ -87,11 +106,19 @@ public class Business {
     }
 
     //for TESTING only (remove later)
-    public HT getWordsHashTable(){
+    public FT getWordsHashTable(){
         return wordsHashTable;
     }
 
     public String[] getIndividualWords(){
         return individualWords;
+    }
+
+    //adaptation of Vicki's code
+    public String toString(){
+        return "Business{" +
+                "business_id='" + businessID + '\''+
+                ", name='" + businessName + '\''+
+                '}';
     }
 }
