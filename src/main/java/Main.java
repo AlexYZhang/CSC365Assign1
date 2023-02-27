@@ -59,7 +59,7 @@ public class Main {
         //should have businesses arrayList with 10000 business (with businessIDs and businessNames) by this point(but not Review per business)
         //have now dealt with the Business yelp dataset
 
-//------------------------ turning all reviews into java objects and storing in multiple arraylist of size 15,887----------------------
+//------------------------ turning all reviews into java Review objects then putting (via concatenation) relevant reviews into corresponding Business----------------------
         FileReader revReader = new FileReader("src/main/java/yelp_dataset/new_reviews.json");
         BufferedReader rbr = new BufferedReader(revReader);
 
@@ -72,9 +72,10 @@ public class Main {
                 businesses.get(newReview.getBus_id()).addToReview(newReview.getText());//add newReview's text to appropriate Business in businesses
             }
         }
+        //at this point, each Business has its review set
 
         for(Business b: businesses.values()){//for each Business in businesses
-            b.runFT();//puts review into a hashTable
+            b.runFT();//puts review of business b into a frequency table
             for(int j=0; j<b.getIndividualWords().length; j++){//for each word in review
                 totalWordsFT.add(b.getIndividualWords()[j]);//adds individual word to totalWordsHT
             }
@@ -84,7 +85,7 @@ public class Main {
 
         //businesses.get("mpf3x-BjTdTEA3yCZrAYPw").runFT();
         //System.out.println("review of business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getBusinessName());
-        System.out.println("review of business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getReview()); //THIS WORKS!
+        //System.out.println("review of business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getReview()); //THIS WORKS!
         //System.out.println("indiv words= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getIndividualWords());
         //System.out.println("count of the in business 1= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getCount("the"));
         //System.out.println("count of the in all businesses= "+totalWordsFT.getCount("the"));
@@ -100,8 +101,14 @@ public class Main {
         //System.out.println("this is the getTf call: "+ getTF(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"), "the"));
         //System.out.println("this is the getIdf call: "+getIdf("the"));
 
-        //System.out.println("businesses containing the= "+businessesContainingWord("i"));
-        setTfidVectorForABusiness(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"));
+
+
+        System.out.println("businesses containing the= "+businessesContainingWord("the"));
+        System.out.println("businesses containing the= "+totalWordsFT.getCount("the"));
+
+        System.out.println("businesses containing my= "+businessesContainingWord("my"));
+        System.out.println("businesses containing my= "+totalWordsFT.getCount("my"));
+        //setTfidVectorForABusiness(businesses.get("mpf3x-BjTdTEA3yCZrAYPw"));
         //System.out.println("business 1's tfidfVector length= "+businesses.get("mpf3x-BjTdTEA3yCZrAYPw").getTfidfVector().length);
         //System.out.println("totalWordsHT's size= "+ totalWordsHT.getSize());
         //System.out.println("totalWordsHT table's index 0 key= "+totalWordsHT.getTable()[1].getKey());
