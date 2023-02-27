@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 
@@ -14,6 +15,7 @@ public class GUI implements ActionListener{
     private JLabel similarBusinessLabel= new JLabel("Similar Businesses: ");
     private JTextArea similarBusiness= new JTextArea("similar businesses will display here");
     //private JLabel similarBusinessBLabel= new JLabel("similar business2 will display here");
+
     GUI(){
         //create a JFrame container
         JFrame jfrm= new JFrame("Business Similarity Recommender");
@@ -49,19 +51,22 @@ public class GUI implements ActionListener{
         //make frame visible
         jfrm.setVisible(true);
 
+
         }
 
         //actionListener for textfield
         public void actionPerformed(ActionEvent ae){//ae generated when user presses Enter button
             String businessName= businessNameInput.getText();//gets inputted businessName
             System.out.println("business Name entered was= "+businessName);
-            /*if(Main.getBusiness(businessName).equals(null)){//if given business name does not exist
-                similarBusiness.setText("The business name you entered was not found.");
-            }else {
-                //similarBusiness.setText(Main.getBestSimilarity(Main.getBusiness(businessName)));//gives recommendation
-            }*/
 
-            similarBusiness.setText("Similar businesses will be displayed here! blah blah blah");
+            Main runMain= new Main();
+            try {
+                runMain.main();
+            }catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+
+            similarBusiness.setText(runMain.getOutputForGUI(businessName));
 
         }
 
